@@ -1,26 +1,11 @@
 import React, { useRef, useEffect, useState } from "react";
-import { GridContext } from "../lib/grid_context";
-import {
-  createTextChangeRange,
-  resolveModuleName,
-  visitLexicalEnvironment,
-} from "typescript";
-import { useGrid } from "../hooks/useGrid";
+import { CreateGridContext, useGrid } from "../hooks/useGrid";
 
 export const GridCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [cellSize, setCellSize] = useState<number>(10);
-  const [offsetX, setOffsetX] = useState<number>(0);
-  const [offsetY, setOffsetY] = useState<number>(0);
+  const grid = useGrid(CreateGridContext(100, 100));
   let [startPanX, setStartPanX] = useState<number>(0);
   let [startPanY, setStartPanY] = useState<number>(0);
-  const rows = 100;
-  const columns = 100;
-  let { state, setCellAt, getCellAt, fillCells, randomizeCells } = useGrid(
-    rows,
-    columns,
-    false
-  );
   useEffect(() => {
     if (!canvasRef.current) {
       return;
@@ -38,19 +23,19 @@ export const GridCanvas = () => {
 
     context.fillStyle = "black";
     context.strokeStyle = "black";
-    for (let x = 0; x < rows; x++) {
-      for (let y = 0; y < columns; y++) {
-        if (getCellAt(x, y) === true) {
+    for (let x = 0; x < grid.ctx.rows; x++) {
+      for (let y = 0; y < grid.ctx.columns; y++) {
+        if (grid.getCellAt(x, y) === true) {
           context.fillRect(
-            (x + offsetX) * cellSize,
-            (y + offsetY) * cellSize,
-            cellSize,
-            cellSize
+            (x + grid.ctx.offsetX) * grid.ctx.cellSize,
+            (y + grid.ctx.offsetY) * grid.ctx.cellSize,
+            grid.ctx.cellSize,
+            grid.ctx.cellSize
           );
         }
       }
     }
-  }, [offsetX, offsetY, cellSize, state]);
+  }, [grid.ctx]);
 
   return (
     <>
@@ -60,10 +45,13 @@ export const GridCanvas = () => {
         ref={canvasRef}
         onMouseMove={(event) => {
           let leftClickHeld = event.buttons === 1;
-
           if (leftClickHeld) {
-            setOffsetX((prev) => prev + (event.clientX - startPanX) / cellSize);
-            setOffsetY((prev) => prev + (event.clientY - startPanY) / cellSize);
+            const oldX = grid.ctx.offsetX;
+            const oldY = grid.ctx.offsetY;
+            grid.setOffset(
+              oldX + (event.clientX - startPanX) / grid.ctx.cellSize,
+              oldY + (event.clientY - startPanY) / grid.ctx.cellSize
+            );
             setStartPanX(event.clientX);
             setStartPanY(event.clientY);
           }
@@ -71,23 +59,24 @@ export const GridCanvas = () => {
         onMouseDown={(event) => {
           setStartPanX(event.clientX);
           setStartPanY(event.clientY);
+          grid.resize(150, 150);
         }}
       />
 
       <input
         onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
           const value = Number(event.target.value);
-          setCellSize(value);
+          grid.setCellSize(value);
         }}
         type="range"
         min={0.1}
         max={50}
-        value={cellSize}
+        value={grid.ctx.cellSize}
       />
 
       <button
         onClick={() => {
-          randomizeCells();
+          grid.randomizeCells();
         }}
       >
         randomize!
@@ -95,3 +84,4 @@ export const GridCanvas = () => {
     </>
   );
 };
+export default GridCanvas;

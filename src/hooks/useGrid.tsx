@@ -1,48 +1,123 @@
 import { useState } from "react";
 
-export const useGrid = (
-  rows: number,
+export interface GridContext {
+  rows: number;
+  columns: number;
+  defaultValue: boolean;
+  state: boolean[][];
+  cellSize: number;
+  offsetX: number;
+  offsetY: number;
+}
+
+const create_2d_array = (
   columns: number,
+  rows: number,
   defaultValue: boolean
 ) => {
-  let initialState = new Array(columns);
+  let array = new Array(columns);
   for (let i = 0; i < rows; i++) {
-    initialState[i] = new Array(rows).fill(defaultValue);
+    array[i] = new Array(rows).fill(defaultValue);
   }
-  const [state, setState] = useState<boolean[][]>(initialState);
+  return array;
+};
+
+export const DefaultGridContext: GridContext = {
+  rows: 3,
+  columns: 3,
+  defaultValue: false,
+  state: create_2d_array(3, 3, false),
+  cellSize: 10,
+  offsetX: 0,
+  offsetY: 0,
+};
+export const CreateGridContext = (
+  rows: number = 3,
+  columns: number = 3,
+  defaultValue: boolean = false,
+  cellSize: number = 10,
+  offsetX: number = 0,
+  offsetY: number = 0
+) => {
+  return {
+    rows,
+    columns,
+    defaultValue,
+    cellSize,
+    offsetX,
+    offsetY,
+    state: create_2d_array(rows, columns, defaultValue),
+  } as GridContext;
+};
+
+export const useGrid = (default_ctx: GridContext = DefaultGridContext) => {
+  const [ctx, setCtx] = useState<GridContext>(default_ctx);
 
   const setCellAt = (x: number, y: number, value: boolean) => {
-    let newState = [...state];
+    let newState = [...ctx.state];
     newState[x][y] = value;
-    setState(newState);
+    setCtx({ ...ctx, state: newState });
   };
 
   const getCellAt = (x: number, y: number) => {
-    return state[x][y];
+    return ctx.state[x][y];
   };
 
   const fillCells = (value: boolean) => {
-    let newState = [...state];
-    for (let x = 0; x < rows; x++) {
-      for (let y = 0; y < columns; y++) {
+    let newState = [...ctx.state];
+    for (let x = 0; x < ctx.rows; x++) {
+      for (let y = 0; y < ctx.columns; y++) {
         newState[x][y] = value;
       }
     }
 
-    setState(newState);
+    setCtx({ ...ctx, state: newState });
   };
 
   const randomizeCells = () => {
-    let newState = [...state];
-    for (let x = 0; x < rows; x++) {
-      for (let y = 0; y < columns; y++) {
+    let newState = [...ctx.state];
+    for (let x = 0; x < ctx.rows; x++) {
+      for (let y = 0; y < ctx.columns; y++) {
         const rand = Math.random() < 0.5;
         newState[x][y] = rand;
       }
     }
 
-    setState(newState);
+    setCtx({ ...ctx, state: newState });
   };
 
-  return { state, getCellAt, setCellAt, fillCells, randomizeCells };
+  const setCellSize = (newCellSize: number) => {
+    setCtx({ ...ctx, cellSize: newCellSize });
+  };
+
+  const setOffset = (newOffsetX: number, newOffsetY: number) => {
+    setCtx({ ...ctx, offsetX: newOffsetX, offsetY: newOffsetY });
+  };
+
+  const resize = (new_rows: number, new_columns: number) => {
+    const newTotal = new_rows + new_columns;
+    const oldTotal = ctx.rows + ctx.columns;
+    // if we are making the grid bigger we have to re populate the grid
+    if (newTotal > oldTotal) {
+      setCtx({
+        ...ctx,
+        rows: new_rows,
+        columns: new_columns,
+        state: create_2d_array(new_rows, new_columns, false),
+      });
+    } else {
+      setCtx({ ...ctx, rows: new_rows, columns: new_columns });
+    }
+  };
+
+  return {
+    ctx,
+    getCellAt,
+    setCellAt,
+    fillCells,
+    randomizeCells,
+    setCellSize,
+    setOffset,
+    resize,
+  };
 };

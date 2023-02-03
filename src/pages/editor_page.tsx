@@ -1,8 +1,12 @@
-import { GridCanvas } from "../components/grid_canvas";
+import React, { Suspense } from "react";
+const LazyGridCanvas = React.lazy(() => import("../components/grid_canvas"));
+
 export const EditorPage = () => {
   return (
     <div className="editor">
-      <GridCanvas />
+      <Suspense>
+        <LazyGridCanvas />
+      </Suspense>
     </div>
   );
 };

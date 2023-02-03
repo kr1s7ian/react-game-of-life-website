@@ -1,9 +1,14 @@
 import React, { useRef, useEffect, useState } from "react";
-import { CreateGridContext, useGrid } from "../hooks/useGrid";
+import { createGridContext, GridContext, useGrid } from "../hooks/useGrid";
 
-export const GridCanvas = () => {
+type UseGridReturnType = ReturnType<typeof useGrid>;
+interface Props {
+  grid: UseGridReturnType;
+}
+
+export const GridCanvas = (props: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const grid = useGrid(CreateGridContext(100, 100));
+  const grid = props.grid;
   let [startPanX, setStartPanX] = useState<number>(0);
   let [startPanY, setStartPanY] = useState<number>(0);
   useEffect(() => {
@@ -38,50 +43,41 @@ export const GridCanvas = () => {
   }, [grid.ctx]);
 
   return (
-    <>
-      <canvas
-        width={window.innerWidth}
-        height={window.innerHeight}
-        ref={canvasRef}
-        onMouseMove={(event) => {
-          let leftClickHeld = event.buttons === 1;
-          if (leftClickHeld) {
-            const oldX = grid.ctx.offsetX;
-            const oldY = grid.ctx.offsetY;
-            grid.setOffset(
-              oldX + (event.clientX - startPanX) / grid.ctx.cellSize,
-              oldY + (event.clientY - startPanY) / grid.ctx.cellSize
-            );
-            setStartPanX(event.clientX);
-            setStartPanY(event.clientY);
-          }
-        }}
-        onMouseDown={(event) => {
+    <canvas
+      width={window.innerWidth}
+      height={window.innerHeight}
+      ref={canvasRef}
+      onMouseMove={(event) => {
+        let middleClickHeld = event.buttons === 4;
+        if (middleClickHeld) {
+          const oldX = grid.ctx.offsetX;
+          const oldY = grid.ctx.offsetY;
+          grid.setOffset(
+            oldX + (event.clientX - startPanX) / grid.ctx.cellSize,
+            oldY + (event.clientY - startPanY) / grid.ctx.cellSize
+          );
           setStartPanX(event.clientX);
           setStartPanY(event.clientY);
-          grid.resize(150, 150);
-        }}
-      />
+        }
+        let leftClickHeld = event.buttons === 1;
+        if (leftClickHeld) {
+          const canvas = canvasRef.current;
+          if (!canvas) {
+            return;
+          }
 
-      <input
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-          const value = Number(event.target.value);
-          grid.setCellSize(value);
-        }}
-        type="range"
-        min={0.1}
-        max={50}
-        value={grid.ctx.cellSize}
-      />
+          const mx = event.clientX - canvas.offsetLeft;
+          const my = event.clientY - canvas.offsetTop;
+          const [x, y] = grid.canvasSpaceToGridSpace(mx, my);
 
-      <button
-        onClick={() => {
-          grid.randomizeCells();
-        }}
-      >
-        randomize!
-      </button>
-    </>
+          grid.setCellAt(x, y, true);
+        }
+      }}
+      onMouseDown={(event) => {
+        setStartPanX(event.clientX);
+        setStartPanY(event.clientY);
+      }}
+    />
   );
 };
 export default GridCanvas;

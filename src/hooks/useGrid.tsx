@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { visitLexicalEnvironment } from "typescript";
 
 export interface GridContext {
   rows: number;
@@ -31,7 +32,7 @@ export const DefaultGridContext: GridContext = {
   offsetX: 0,
   offsetY: 0,
 };
-export const CreateGridContext = (
+export const createGridContext = (
   rows: number = 3,
   columns: number = 3,
   defaultValue: boolean = false,
@@ -110,6 +111,21 @@ export const useGrid = (default_ctx: GridContext = DefaultGridContext) => {
     }
   };
 
+  const canvasSpaceToGridSpace = (x: number, y: number) => {
+    let newX = Math.floor(x / ctx.cellSize - ctx.offsetX);
+    let newY = Math.floor(y / ctx.cellSize - ctx.offsetY);
+
+    // make negative values zero
+    newX = Math.max(0, newX);
+    newY = Math.max(0, newY);
+
+    // constrain positive values to the dimensions of the grid
+    newX = Math.min(ctx.rows - 1, newX);
+    newY = Math.min(ctx.columns - 1, newY);
+
+    return [newX, newY];
+  };
+
   return {
     ctx,
     getCellAt,
@@ -119,5 +135,6 @@ export const useGrid = (default_ctx: GridContext = DefaultGridContext) => {
     setCellSize,
     setOffset,
     resize,
+    canvasSpaceToGridSpace,
   };
 };

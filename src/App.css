@@ -1,5 +1,7 @@
 canvas {
   margin: 0 auto;
   display: block;
+  width: 95vw;
+  height: 90vh;
   border: 5px solid navy;
 }

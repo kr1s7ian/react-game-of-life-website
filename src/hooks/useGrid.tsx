@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { visitLexicalEnvironment } from "typescript";
+import GridCanvas from "../components/grid_canvas";
 
 export interface GridContext {
   rows: number;
@@ -57,7 +58,10 @@ export const useGrid = (default_ctx: GridContext = DefaultGridContext) => {
   const setCellAt = (x: number, y: number, value: boolean) => {
     let newState = [...ctx.state];
     newState[x][y] = value;
-    setCtx({ ...ctx, state: newState });
+    setCtx((prev) => ({
+      ...prev,
+      state: newState,
+    }));
   };
 
   const getCellAt = (x: number, y: number) => {
@@ -72,7 +76,10 @@ export const useGrid = (default_ctx: GridContext = DefaultGridContext) => {
       }
     }
 
-    setCtx({ ...ctx, state: newState });
+    setCtx((prev) => ({
+      ...prev,
+      state: newState,
+    }));
   };
 
   const randomizeCells = () => {
@@ -84,15 +91,25 @@ export const useGrid = (default_ctx: GridContext = DefaultGridContext) => {
       }
     }
 
-    setCtx({ ...ctx, state: newState });
+    setCtx((prev) => ({
+      ...prev,
+      state: newState,
+    }));
   };
 
   const setCellSize = (newCellSize: number) => {
-    setCtx({ ...ctx, cellSize: newCellSize });
+    setCtx((prev) => ({
+      ...prev,
+      cellSize: newCellSize,
+    }));
   };
 
   const setOffset = (newOffsetX: number, newOffsetY: number) => {
-    setCtx({ ...ctx, offsetX: newOffsetX, offsetY: newOffsetY });
+    setCtx((prev) => ({
+      ...prev,
+      offsetX: newOffsetX,
+      offsetY: newOffsetY,
+    }));
   };
 
   const resize = (new_rows: number, new_columns: number) => {
@@ -126,6 +143,25 @@ export const useGrid = (default_ctx: GridContext = DefaultGridContext) => {
     return [newX, newY];
   };
 
+  const windowSpaceToGridSpace = (
+    x: number,
+    y: number,
+    canvas: HTMLCanvasElement
+  ) => {
+    // account for page scroll
+    let newX = x - canvas.offsetLeft + window.scrollX;
+    let newY = y - canvas.offsetTop + window.scrollY;
+
+    //account for canvas width and height
+    newX = (newX * canvas.width) / canvas.offsetWidth;
+    newY = (newY * canvas.height) / canvas.offsetHeight;
+
+    // translate to grid space
+    [newX, newY] = canvasSpaceToGridSpace(newX, newY);
+
+    return [newX, newY];
+  };
+
   return {
     ctx,
     getCellAt,
@@ -136,5 +172,6 @@ export const useGrid = (default_ctx: GridContext = DefaultGridContext) => {
     setOffset,
     resize,
     canvasSpaceToGridSpace,
+    windowSpaceToGridSpace,
   };
 };

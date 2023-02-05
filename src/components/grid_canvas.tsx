@@ -1,5 +1,12 @@
-import React, { useRef, useEffect, useState } from "react";
+import { convertRoutesToDataRoutes } from "@remix-run/router/dist/utils";
+import { ClientRequest } from "http";
+import React, { useRef, useEffect, useState, MouseEvent } from "react";
+import { createTextChangeRange } from "typescript";
 import { createGridContext, GridContext, useGrid } from "../hooks/useGrid";
+interface Vec2 {
+  x: number;
+  y: number;
+}
 
 type UseGridReturnType = ReturnType<typeof useGrid>;
 interface Props {
@@ -7,76 +14,94 @@ interface Props {
 }
 
 export const GridCanvas = (props: Props) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const grid = props.grid;
-  let [startPanX, setStartPanX] = useState<number>(0);
-  let [startPanY, setStartPanY] = useState<number>(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvas = canvasRef.current;
+  const [startPanning, setStartPanning] = useState<Vec2>({ x: 0, y: 0 });
+
   useEffect(() => {
-    if (!canvasRef.current) {
+    if (!canvas) {
       return;
     }
-
-    const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
-
     if (!context) {
       return;
     }
 
+    //clearing screen
     context.fillStyle = "white";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
+    //drawing grid's elements
+    context.setTransform(grid.ctx.cellSize, 0, 0, grid.ctx.cellSize, 0, 0);
     context.fillStyle = "black";
-    context.strokeStyle = "black";
     for (let x = 0; x < grid.ctx.rows; x++) {
       for (let y = 0; y < grid.ctx.columns; y++) {
         if (grid.getCellAt(x, y) === true) {
-          context.fillRect(
-            (x + grid.ctx.offsetX) * grid.ctx.cellSize,
-            (y + grid.ctx.offsetY) * grid.ctx.cellSize,
-            grid.ctx.cellSize,
-            grid.ctx.cellSize
-          );
+          context.fillRect(x + grid.ctx.offsetX, y + grid.ctx.offsetY, 1, 1);
         }
       }
     }
   }, [grid.ctx]);
 
+  const handlePanning = (
+    e: React.MouseEvent<HTMLCanvasElement, globalThis.MouseEvent>
+  ) => {
+    if (!canvas) {
+      return;
+    }
+
+    let middleClickHeld = e.buttons === 4;
+    if (middleClickHeld) {
+      const prevOffset = { x: grid.ctx.offsetX, y: grid.ctx.offsetY } as Vec2;
+      grid.setOffset(
+        prevOffset.x + (e.clientX - startPanning.x) / grid.ctx.cellSize,
+        prevOffset.y + (e.clientY - startPanning.y) / grid.ctx.cellSize
+      );
+      setStartPanning({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const handleDrawing = (
+    e: React.MouseEvent<HTMLCanvasElement, globalThis.MouseEvent>
+  ) => {
+    if (!canvas) {
+      return;
+    }
+    const leftClickHeld = e.buttons === 1;
+    const rightClickHeld = e.buttons === 2;
+    if (leftClickHeld || rightClickHeld) {
+      const [x, y] = grid.windowSpaceToGridSpace(e.clientX, e.clientY, canvas);
+      leftClickHeld ? grid.setCellAt(x, y, true) : grid.setCellAt(x, y, false);
+    }
+  };
+
+  const setupPrePanning = (e: MouseEvent) => {
+    setStartPanning({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleZooming = (e: React.WheelEvent<HTMLCanvasElement>) => {
+    grid.setCellSize(
+      Math.max(
+        1,
+        grid.ctx.cellSize + Math.max(-20, Math.min(20, e.deltaY)) * 0.02
+      )
+    );
+  };
+
   return (
     <canvas
-      width={window.innerWidth}
-      height={window.innerHeight}
+      tabIndex={1}
+      width={window.innerWidth * 2}
+      height={window.innerHeight * 2}
       ref={canvasRef}
-      onMouseMove={(event) => {
-        let middleClickHeld = event.buttons === 4;
-        if (middleClickHeld) {
-          const oldX = grid.ctx.offsetX;
-          const oldY = grid.ctx.offsetY;
-          grid.setOffset(
-            oldX + (event.clientX - startPanX) / grid.ctx.cellSize,
-            oldY + (event.clientY - startPanY) / grid.ctx.cellSize
-          );
-          setStartPanX(event.clientX);
-          setStartPanY(event.clientY);
-        }
-        let leftClickHeld = event.buttons === 1;
-        if (leftClickHeld) {
-          const canvas = canvasRef.current;
-          if (!canvas) {
-            return;
-          }
-
-          const mx = event.clientX - canvas.offsetLeft;
-          const my = event.clientY - canvas.offsetTop;
-          const [x, y] = grid.canvasSpaceToGridSpace(mx, my);
-
-          grid.setCellAt(x, y, true);
-        }
+      onMouseDown={(e) => setupPrePanning(e)}
+      onMouseMove={(e) => {
+        handlePanning(e);
+        handleDrawing(e);
       }}
-      onMouseDown={(event) => {
-        setStartPanX(event.clientX);
-        setStartPanY(event.clientY);
-      }}
+      onWheel={(e) => handleZooming(e)}
+      onContextMenu={(event) => event.preventDefault()}
     />
   );
 };

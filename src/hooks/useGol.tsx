@@ -80,7 +80,6 @@ export const useGol = (gridCtx: GridCtx = DefaultGridCtx) => {
   const setSimulationFramerate = (newFramerate: number) => {
     setCtx((prev) => ({ ...prev, simulationFramerate: newFramerate }));
   };
-
   return {
     ctx,
     grid,

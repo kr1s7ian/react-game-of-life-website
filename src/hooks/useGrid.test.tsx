@@ -1,26 +1,27 @@
 import { render, renderHook } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
-import { createGridContext, useGrid } from "./useGrid";
+import { createGridCtx, useGrid } from "./useGrid";
 import { assert, describe, expect, it } from "vitest";
+import { Vec2 } from "../utils";
 
 describe("useGrid", () => {
   it("The grid should have 3 rows and 3 columns", () => {
-    const { result } = renderHook(() => useGrid());
+    const { result } = renderHook(() => useGrid(createGridCtx(3, 3, false)));
     expect(result.current.ctx.state.length).toEqual(3);
     expect(result.current.ctx.state[0].length).toEqual(3);
   });
 
   it("should return the cell at index 1 1 which should be true)", () => {
-    const { result } = renderHook(() => useGrid());
-    result.current.setCellAt(1, 1, true);
+    const { result } = renderHook(() => useGrid(createGridCtx(3, 3, false)));
+    result.current.setCell(1, 1, true);
 
-    expect(result.current.getCellAt(1, 1)).toEqual(true);
+    expect(result.current.getCell(1, 1)).toEqual(true);
   });
 
   it("Should set the cell at index 1 1 (center) to true", () => {
-    const { result } = renderHook(() => useGrid());
+    const { result } = renderHook(() => useGrid(createGridCtx(3, 3, false)));
     act(() => {
-      result.current.setCellAt(1, 1, true);
+      result.current.setCell(1, 1, true);
     });
 
     const expected_state = [
@@ -33,8 +34,8 @@ describe("useGrid", () => {
   });
 
   it("The grid's cells should be all set to true", () => {
-    const { result } = renderHook(() => useGrid());
-    result.current.fillCells(true);
+    const { result } = renderHook(() => useGrid(createGridCtx(3, 3, false)));
+    result.current.fill(true);
 
     const expected_state = [
       [true, true, true],
@@ -44,94 +45,9 @@ describe("useGrid", () => {
     expect(result.current.ctx.state).toEqual(expected_state);
   });
 
-  it("Should set cellSize in ctx to 3", () => {
-    const { result } = renderHook(() => useGrid());
-    act(() => {
-      result.current.setCellSize(3);
-    });
-
-    expect(result.current.ctx.cellSize).toEqual(3);
-  });
-
-  it("Should set offsetX in ctx to 10 and offsetY to 23", () => {
-    const { result } = renderHook(() => useGrid());
-    act(() => {
-      result.current.setOffset(10, 23);
-    });
-    expect(result.current.ctx.offsetX).toEqual(10);
-    expect(result.current.ctx.offsetY).toEqual(23);
-  });
-
-  it("Should set rows in ctx to 10 and columns to 15", () => {
-    const { result } = renderHook(() => useGrid());
-
-    act(() => {
-      result.current.resize(10, 15);
-    });
-
-    expect(result.current.ctx.rows).toEqual(10);
-    expect(result.current.ctx.columns).toEqual(15);
-  });
-
-  it("Should translate canvas mouse position to grid mouse position", () => {
-    const { result } = renderHook(() => useGrid(createGridContext(10, 10)));
-    let resultMouseX;
-    let resultMouseY;
-
-    act(() => {
-      const testMx = 4;
-      const testMy = 7;
-      result.current.setOffset(testMx, testMy);
-      const [mx, my] = result.current.canvasSpaceToGridSpace(testMx, testMy);
-      resultMouseX = mx;
-      resultMouseY = my;
-    });
-
-    expect(resultMouseX).toEqual(0);
-    expect(resultMouseY).toEqual(0);
-  });
-
-  it("Should make negative values zero", () => {
-    const { result } = renderHook(() => useGrid(createGridContext(10, 10)));
-    let resultMouseX;
-    let resultMouseY;
-
-    act(() => {
-      result.current.setOffset(3, 4);
-      const [mx, my] = result.current.canvasSpaceToGridSpace(-50, -100);
-      resultMouseX = mx;
-      resultMouseY = my;
-    });
-
-    expect(resultMouseX).toEqual(0);
-    expect(resultMouseY).toEqual(0);
-  });
-
-  it("Should restrict max positive values to the grid's dimensions", () => {
-    const { result } = renderHook(() => useGrid(createGridContext(10, 10)));
-    const { rows, columns, cellSize } = result.current.ctx;
-    let resultMouseX;
-    let resultMouseY;
-
-    act(() => {
-      // obviously overflowing positions for grid
-      const [mx, my] = result.current.canvasSpaceToGridSpace(
-        rows * cellSize + 100,
-        columns * cellSize + 100
-      );
-      resultMouseX = mx;
-      resultMouseY = my;
-    });
-
-    expect(resultMouseX).toEqual(rows - 1);
-    expect(resultMouseY).toEqual(columns - 1);
-  });
-
-  it("test setState should set all the grid to be active", () => {
-    const { result } = renderHook(() =>
-      useGrid(createGridContext(3, 3, false))
-    );
-    const newState: boolean[][] = [
+  it("the grid state should be set to all active cells", () => {
+    const { result } = renderHook(() => useGrid(createGridCtx(3, 3, false)));
+    const newState = [
       [true, true, true],
       [true, true, true],
       [true, true, true],
@@ -141,5 +57,51 @@ describe("useGrid", () => {
     });
 
     expect(result.current.ctx.state).toEqual(newState);
+  });
+
+  it("Should make negative values zero", () => {
+    const { result } = renderHook(() => useGrid(createGridCtx(10, 10)));
+    let resultMouseX;
+    let resultMouseY;
+    const canvas = new HTMLCanvasElement();
+    canvas.width = 100;
+    canvas.height = 100;
+
+    act(() => {
+      const pos = result.current.windowSpaceToGridSpace(-50, -100, canvas, 1, {
+        x: 3,
+        y: 4,
+      });
+      resultMouseX = pos.x;
+      resultMouseY = pos.y;
+    });
+
+    expect(resultMouseX).toEqual(0);
+    expect(resultMouseY).toEqual(0);
+  });
+
+  it("Should restrict max positive values to the grid's dimensions", () => {
+    const { result } = renderHook(() => useGrid(createGridCtx(10, 10)));
+    const { rows, columns } = result.current.ctx;
+    const canvas = new HTMLCanvasElement();
+    canvas.width = 100;
+    canvas.height = 100;
+    const cellSize = 1;
+    let pos: Vec2<number> = { x: 0, y: 0 };
+    const offset: Vec2<number> = { x: 0, y: 0 };
+
+    act(() => {
+      // obviously overflowing positions for grid
+      pos = result.current.windowSpaceToGridSpace(
+        rows * cellSize + 100,
+        columns * cellSize + 100,
+        canvas,
+        cellSize,
+        offset
+      );
+    });
+
+    expect(pos.x).toEqual(rows - 1);
+    expect(pos.y).toEqual(columns - 1);
   });
 });

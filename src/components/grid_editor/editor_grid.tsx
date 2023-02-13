@@ -1,22 +1,25 @@
 import React, { useRef, useEffect, useState, MouseEvent } from "react";
-import { useGrid } from "../../hooks/useGrid";
+import { useGrid, UseGridReturnType } from "../../hooks/useGrid";
 import disableScroll from "disable-scroll";
+import { Vec2 } from "../../utils";
 
-interface Vec2 {
-  x: number;
-  y: number;
-}
-
-export type UseGridReturnType = ReturnType<typeof useGrid>;
 interface Props {
   grid: UseGridReturnType;
 }
 
-export const GridCanvas = (props: Props) => {
+export const GridEditor = (props: Props) => {
   const grid = props.grid;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvas = canvasRef.current;
-  const [startPanning, setStartPanning] = useState<Vec2>({ x: 0, y: 0 });
+  const [startPanning, setStartPanning] = useState<Vec2<number>>({
+    x: 0,
+    y: 0,
+  });
+  const [offset, setOffset] = useState<Vec2<number>>({
+    x: 0,
+    y: 0,
+  });
+  const [cellSize, setCellSize] = useState<number>(1);
 
   useEffect(() => {
     if (!canvas) {
@@ -37,18 +40,16 @@ export const GridCanvas = (props: Props) => {
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     //drawing cells
-    const size = grid.ctx.cellSize;
-    context.setTransform(size, 0, 0, size, 0, 0);
+    context.setTransform(cellSize, 0, 0, cellSize, 0, 0);
     context.fillStyle = "black";
     for (let x = 0; x < grid.ctx.rows; x++) {
       for (let y = 0; y < grid.ctx.columns; y++) {
-        if (grid.getCellAt(x, y) === true) {
-          const [xOff, yOff] = [grid.ctx.offsetX, grid.ctx.offsetY];
-          context.fillRect(x + xOff, y + yOff, 1, 1);
+        if (grid.getCell(x, y) === true) {
+          context.fillRect(x + offset.x, y + offset.y, 1, 1);
         }
       }
     }
-  }, [grid]);
+  }, [grid, offset, cellSize]);
 
   const handlePanning = (
     e: React.MouseEvent<HTMLCanvasElement, globalThis.MouseEvent>
@@ -59,11 +60,11 @@ export const GridCanvas = (props: Props) => {
 
     let middleClickHeld = e.buttons === 4;
     if (middleClickHeld) {
-      const prevOffset = { x: grid.ctx.offsetX, y: grid.ctx.offsetY } as Vec2;
-      grid.setOffset(
-        prevOffset.x + ((e.clientX - startPanning.x) / grid.ctx.cellSize) * 2,
-        prevOffset.y + ((e.clientY - startPanning.y) / grid.ctx.cellSize) * 2
-      );
+      const prevOffset: Vec2<number> = { x: offset.x, y: offset.y };
+      setOffset({
+        x: prevOffset.x + ((e.clientX - startPanning.x) / cellSize) * 2,
+        y: prevOffset.y + ((e.clientY - startPanning.y) / cellSize) * 2,
+      });
       setStartPanning({ x: e.clientX, y: e.clientY });
     }
   };
@@ -77,8 +78,18 @@ export const GridCanvas = (props: Props) => {
     const leftClickHeld = e.buttons === 1;
     const rightClickHeld = e.buttons === 2;
     if (leftClickHeld || rightClickHeld) {
-      const [x, y] = grid.windowSpaceToGridSpace(e.clientX, e.clientY, canvas);
-      leftClickHeld ? grid.setCellAt(x, y, true) : grid.setCellAt(x, y, false);
+      const pos = grid.windowSpaceToGridSpace(
+        e.clientX,
+        e.clientY,
+        canvas,
+        cellSize,
+        offset
+      );
+      if (!pos) {
+        return;
+      }
+      const cellState = leftClickHeld;
+      grid.setCell(pos.x, pos.y, cellState);
     }
   };
 
@@ -87,11 +98,8 @@ export const GridCanvas = (props: Props) => {
   };
 
   const handleZooming = (e: React.WheelEvent<HTMLCanvasElement>) => {
-    grid.setCellSize(
-      Math.max(
-        1,
-        grid.ctx.cellSize + Math.max(-20, Math.min(20, e.deltaY)) * -0.03
-      )
+    setCellSize(
+      Math.max(1, cellSize + Math.max(-20, Math.min(20, e.deltaY)) * -0.03)
     );
   };
 
@@ -116,4 +124,4 @@ export const GridCanvas = (props: Props) => {
     />
   );
 };
-export default GridCanvas;
+export default GridEditor;

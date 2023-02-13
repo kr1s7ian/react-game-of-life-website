@@ -1,12 +1,12 @@
-import { renderHook } from "@testing-library/react";
+import { render, renderHook } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
+import { createGridCtx, useGrid } from "./useGrid";
 import { assert, describe, expect, it } from "vitest";
-import { calculateNeighbors } from "./game_of_life";
-import { createGridContext, useGrid } from "./hooks/useGrid";
+import { calculateNeighbors, useGol } from "./useGol";
 
-describe("game_of_life implementation tests", () => {
+describe("useGol", () => {
   it("test neighbor calculation when grid is all active", () => {
-    const gridHook = renderHook(() => useGrid(createGridContext(3, 3, true)));
+    const gridHook = renderHook(() => useGrid(createGridCtx(3, 3, true)));
     const grid = gridHook.result.current;
     const result = calculateNeighbors(grid.ctx.state, 1, 1);
 
@@ -14,12 +14,12 @@ describe("game_of_life implementation tests", () => {
   });
 
   it("test neighbor calculation when grid is partially active", () => {
-    const gridHook = renderHook(() => useGrid(createGridContext(3, 3, false)));
+    const gridHook = renderHook(() => useGrid(createGridCtx(3, 3, false)));
     const grid = gridHook.result.current;
     act(() => {
-      grid.setCellAt(0, 0, true);
-      grid.setCellAt(1, 0, true);
-      grid.setCellAt(2, 0, true);
+      grid.setCell(0, 0, true);
+      grid.setCell(1, 0, true);
+      grid.setCell(2, 0, true);
     });
     const result = calculateNeighbors(grid.ctx.state, 1, 1);
 
@@ -27,7 +27,7 @@ describe("game_of_life implementation tests", () => {
   });
 
   it("test neighbor calculation when grid is all inactive", () => {
-    const gridHook = renderHook(() => useGrid(createGridContext(3, 3, false)));
+    const gridHook = renderHook(() => useGrid(createGridCtx(3, 3, false)));
     const grid = gridHook.result.current;
     const result = calculateNeighbors(grid.ctx.state, 1, 1);
 

@@ -1,6 +1,9 @@
-import { GroupAdd } from "@mui/icons-material";
-import { UseGridReturnType } from "./components/grid_editor/editor_grid";
+import { useState } from "react";
+import { Vec2 } from "../utils";
+import { DefaultGridCtx, GridCtx, useGrid } from "./useGrid";
 import { cloneDeep } from "lodash";
+
+export type UseGolReturnType = ReturnType<typeof useGol>;
 
 export const calculateNeighbors = (
   state: boolean[][],
@@ -46,3 +49,19 @@ export const CalculateNextGen = (
 
   return nextState;
 };
+
+export const useGol = (gridCtx: GridCtx = DefaultGridCtx) => {
+  const grid = useGrid(gridCtx);
+  const advanceGeneration = () => {
+    const nextGen = CalculateNextGen(
+      grid.ctx.state,
+      grid.ctx.rows,
+      grid.ctx.columns
+    );
+    grid.setState(nextGen);
+  };
+
+  return { grid, advanceGeneration };
+};
+
+export default useGol;

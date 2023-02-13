@@ -1,12 +1,12 @@
 import { grid2Classes } from "@mui/material";
 import { Box } from "@mui/system";
 import { useEffect } from "react";
+import { UseGolReturnType } from "../../hooks/useGol";
 import { CanvasToolbar } from "./editor_bar";
 import GridCanvas from "./editor_grid";
-import { UseGridReturnType } from "./editor_grid";
 
 interface Props {
-  grid: UseGridReturnType;
+  gol: UseGolReturnType;
 }
 
 const Editor = (props: Props) => {
@@ -19,10 +19,11 @@ const Editor = (props: Props) => {
         marginTop: "50px",
       }}
     >
-      <CanvasToolbar grid={props.grid}></CanvasToolbar>
-      <GridCanvas grid={props.grid} />
+      <CanvasToolbar gol={props.gol}></CanvasToolbar>
+      <GridCanvas grid={props.gol.grid} />
     </Box>
   );
 };
 
 export default Editor;
+export {};

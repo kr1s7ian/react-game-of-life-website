@@ -25,15 +25,15 @@ import {
 import Button from "@mui/material/Button";
 import { Stack } from "@mui/system";
 import { useEffect, useRef, useState } from "react";
-import { CalculateNextGen } from "../../game_of_life";
-import { UseGridReturnType } from "./editor_grid";
+import { UseGolReturnType } from "../../hooks/useGol";
 
 interface Props {
-  grid: UseGridReturnType;
+  gol: UseGolReturnType;
 }
 
 export const CanvasToolbar = (props: Props) => {
-  const grid = props.grid;
+  const grid = props.gol.grid;
+  const gol = props.gol;
   const menuButton = useRef<HTMLButtonElement>(null);
 
   const [showMenu, setShowmenu] = useState<boolean>(false);
@@ -50,7 +50,7 @@ export const CanvasToolbar = (props: Props) => {
   useEffect(() => {
     const interval = setInterval(() => {
       if (running) {
-        grid.advanceGeneration();
+        gol.advanceGeneration();
         console.log("tick");
       }
     }, 1000 / 10);
@@ -99,7 +99,7 @@ export const CanvasToolbar = (props: Props) => {
           checked={running}
           onClick={toggleRunning}
         />
-        <IconButton onClick={grid.advanceGeneration}>
+        <IconButton onClick={gol.advanceGeneration}>
           <ChevronRight></ChevronRight>
         </IconButton>
         <Stack
@@ -109,12 +109,12 @@ export const CanvasToolbar = (props: Props) => {
           marginRight="auto"
         >
           <Tooltip title="clear">
-            <IconButton onClick={() => grid.fillCells(false)}>
+            <IconButton onClick={() => grid.fill(false)}>
               <Refresh></Refresh>
             </IconButton>
           </Tooltip>
           <Tooltip title="randomize">
-            <IconButton onClick={grid.randomizeCells}>
+            <IconButton onClick={grid.randomize}>
               <Shuffle></Shuffle>
             </IconButton>
           </Tooltip>

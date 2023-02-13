@@ -14,6 +14,7 @@ import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { Home } from "@mui/icons-material";
 import { Stack } from "@mui/system";
+import { Link } from "react-router-dom";
 
 export const Navbar = () => {
   return (
@@ -25,16 +26,7 @@ export const Navbar = () => {
               <Home></Home>
             </IconButton>
           </Tooltip>
-          <Button
-            href="/react-game-of-life-website/editor/"
-            sx={{
-              my: 2,
-              color: "white",
-              display: "block",
-            }}
-          >
-            {"Editor"}
-          </Button>
+          <Link to={"/editor"}>{"Editor"}</Link>
         </Toolbar>
       </Container>
     </AppBar>

@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { HashRouter as Router, Route, Routes } from "react-router-dom";
 import { Navbar } from "./components/navbar";
 import { HomePage } from "./pages/home_page";
 import EditorPage from "./pages/editor_page";
@@ -11,16 +11,10 @@ function App() {
   return (
     <ThemeProvider theme={appTheme}>
       <CssBaseline />
-      <Router>
+      <Router basename={"/"}>
         <Routes>
-          <Route
-            path="/react-game-of-life-website/"
-            element={<HomePage />}
-          ></Route>
-          <Route
-            path="/react-game-of-life-website/editor"
-            element={<EditorPage />}
-          ></Route>
+          <Route path="/" element={<HomePage />}></Route>
+          <Route path="/editor" element={<EditorPage />}></Route>
         </Routes>
       </Router>
     </ThemeProvider>

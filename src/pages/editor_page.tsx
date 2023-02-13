@@ -140,7 +140,7 @@ export default function EditorPage() {
         <Divider />
         <List>
           <ListItem disablePadding>
-            <ListItemButton href="/">
+            <ListItemButton href="/react-game-of-life-website/">
               <ListItemIcon>{<Home></Home>}</ListItemIcon>
               <ListItemText primary={"Home"}></ListItemText>
             </ListItemButton>

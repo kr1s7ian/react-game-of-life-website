@@ -21,12 +21,12 @@ export const Navbar = () => {
       <Container maxWidth="xl">
         <Toolbar>
           <Tooltip title="Home">
-            <IconButton href="/">
+            <IconButton href="/react-game-of-life-website/">
               <Home></Home>
             </IconButton>
           </Tooltip>
           <Button
-            href="/editor"
+            href="/react-game-of-life-website/editor/"
             sx={{
               my: 2,
               color: "white",

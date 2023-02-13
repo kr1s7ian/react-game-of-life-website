@@ -13,8 +13,14 @@ function App() {
       <CssBaseline />
       <Router>
         <Routes>
-          <Route path="/" element={<HomePage />}></Route>
-          <Route path="editor" element={<EditorPage />}></Route>
+          <Route
+            path="/react-game-of-life-website/"
+            element={<HomePage />}
+          ></Route>
+          <Route
+            path="/react-game-of-life-website/editor"
+            element={<EditorPage />}
+          ></Route>
         </Routes>
       </Router>
     </ThemeProvider>

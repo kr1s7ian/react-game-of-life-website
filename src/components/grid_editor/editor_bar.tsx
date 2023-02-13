@@ -32,17 +32,25 @@ interface Props {
   gol: UseGolReturnType;
 }
 
+const sliderMarks = [
+  { value: 10, label: "10 fps" },
+  { value: 15, label: "" },
+  { value: 20, label: "" },
+  { value: 25, label: "" },
+  { value: 30, label: "" },
+  { value: 35, label: "" },
+  { value: 40, label: "" },
+  { value: 45, label: "" },
+  { value: 50, label: "" },
+  { value: 55, label: "" },
+  { value: 60, label: "60 fps" },
+];
+
 export const CanvasToolbar = (props: Props) => {
   const grid = props.gol.grid;
   const gol = props.gol;
-  const menuButton = useRef<HTMLButtonElement>(null);
 
   const [showMenu, setShowmenu] = useState<boolean>(false);
-
-  const toggleShowMenu = () => {
-    setShowmenu((prev) => !prev);
-  };
-
   useEffect(() => {
     const interval = setInterval(() => {
       if (gol.ctx.running) {
@@ -56,78 +64,31 @@ export const CanvasToolbar = (props: Props) => {
   return (
     <AppBar position="relative">
       <Toolbar sx={{ flexWrap: "wrap" }}>
-        <IconButton
-          onClick={toggleShowMenu}
-          ref={menuButton}
-          sx={{ marginRight: "1.0rem" }}
-        >
-          <MenuIcon />
-        </IconButton>
-        <Popper
-          anchorEl={menuButton.current}
-          open={showMenu}
-          placement="bottom-start"
-          transition
-          disablePortal
-        >
-          {({ TransitionProps, placement }) => (
-            <Grow
-              {...TransitionProps}
-              style={{
-                transformOrigin:
-                  placement === "bottom-start" ? "left top" : "left bottom",
-              }}
-            >
-              <Paper sx={{ width: "200px" }}>
-                <MenuList>
-                  <MenuItem>save</MenuItem>
-                  <MenuItem>load</MenuItem>
-                </MenuList>
-              </Paper>
-            </Grow>
-          )}
-        </Popper>
-        <Input placeholder="new project" sx={{ marginRight: "auto" }}></Input>
+        <Input placeholder="new project"></Input>
         <Checkbox
           icon={<PlayArrow />}
           checkedIcon={<Pause />}
           checked={gol.ctx.running}
           onClick={gol.toggleRunnngSim}
+          sx={{
+            marginRight: "auto",
+            marginLeft: "auto",
+          }}
         />
         <Slider
           aria-label="Custom marks"
           defaultValue={5}
           step={5}
-          max={90}
+          max={60}
           min={5}
           valueLabelDisplay="auto"
-          marks
+          marks={sliderMarks}
           size="medium"
           sx={{ width: "250px", marginLeft: "1rem", marginRight: "1rem" }}
           onChange={(e, newValue) =>
             typeof newValue === "number" && gol.setSimulationFramerate(newValue)
           }
         />
-        <IconButton onClick={gol.advanceGeneration}>
-          <ChevronRight></ChevronRight>
-        </IconButton>
-        <Stack
-          direction="row"
-          spacing="2rem"
-          marginLeft="auto"
-          marginRight="auto"
-        >
-          <Tooltip title="clear">
-            <IconButton onClick={() => grid.fill(false)}>
-              <Refresh></Refresh>
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="randomize">
-            <IconButton onClick={grid.randomize}>
-              <Shuffle></Shuffle>
-            </IconButton>
-          </Tooltip>
-        </Stack>
       </Toolbar>
     </AppBar>
   );

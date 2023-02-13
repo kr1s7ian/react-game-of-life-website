@@ -5,6 +5,16 @@ import { cloneDeep } from "lodash";
 
 export type UseGolReturnType = ReturnType<typeof useGol>;
 
+export interface GolCtx {
+  running: boolean;
+  simulationFramerate: number;
+}
+
+export const defaultGolCtx = {
+  running: false,
+  simulationFramerate: 10,
+};
+
 export const calculateNeighbors = (
   state: boolean[][],
   x: number,
@@ -52,6 +62,8 @@ export const CalculateNextGen = (
 
 export const useGol = (gridCtx: GridCtx = DefaultGridCtx) => {
   const grid = useGrid(gridCtx);
+  const [ctx, setCtx] = useState<GolCtx>(defaultGolCtx);
+
   const advanceGeneration = () => {
     const nextGen = CalculateNextGen(
       grid.ctx.state,
@@ -61,7 +73,21 @@ export const useGol = (gridCtx: GridCtx = DefaultGridCtx) => {
     grid.setState(nextGen);
   };
 
-  return { grid, advanceGeneration };
+  const toggleRunnngSim = () => {
+    setCtx((prev) => ({ ...prev, running: !prev.running }));
+  };
+
+  const setSimulationFramerate = (newFramerate: number) => {
+    setCtx((prev) => ({ ...prev, simulationFramerate: newFramerate }));
+  };
+
+  return {
+    ctx,
+    grid,
+    advanceGeneration,
+    setSimulationFramerate,
+    toggleRunnngSim,
+  };
 };
 
 export default useGol;

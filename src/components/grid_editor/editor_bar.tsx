@@ -18,6 +18,7 @@ import {
   MenuList,
   Paper,
   Popper,
+  Slider,
   Toolbar,
   Tooltip,
   Typography,
@@ -37,26 +38,20 @@ export const CanvasToolbar = (props: Props) => {
   const menuButton = useRef<HTMLButtonElement>(null);
 
   const [showMenu, setShowmenu] = useState<boolean>(false);
-  const [running, setRunning] = useState<boolean>(false);
 
   const toggleShowMenu = () => {
     setShowmenu((prev) => !prev);
   };
 
-  const toggleRunning = () => {
-    setRunning((prev) => !prev);
-  };
-
   useEffect(() => {
     const interval = setInterval(() => {
-      if (running) {
+      if (gol.ctx.running) {
         gol.advanceGeneration();
-        console.log("tick");
       }
-    }, 1000 / 10);
+    }, 1000 / gol.ctx.simulationFramerate);
 
     return () => clearInterval(interval);
-  }, [running, grid.ctx.state]);
+  }, [gol]);
 
   return (
     <AppBar position="relative">
@@ -96,8 +91,22 @@ export const CanvasToolbar = (props: Props) => {
         <Checkbox
           icon={<PlayArrow />}
           checkedIcon={<Pause />}
-          checked={running}
-          onClick={toggleRunning}
+          checked={gol.ctx.running}
+          onClick={gol.toggleRunnngSim}
+        />
+        <Slider
+          aria-label="Custom marks"
+          defaultValue={5}
+          step={5}
+          max={90}
+          min={5}
+          valueLabelDisplay="auto"
+          marks
+          size="medium"
+          sx={{ width: "250px", marginLeft: "1rem", marginRight: "1rem" }}
+          onChange={(e, newValue) =>
+            typeof newValue === "number" && gol.setSimulationFramerate(newValue)
+          }
         />
         <IconButton onClick={gol.advanceGeneration}>
           <ChevronRight></ChevronRight>

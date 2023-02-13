@@ -11,19 +11,10 @@ interface Props {
 
 const Editor = (props: Props) => {
   return (
-    <Box
-      width="90vw"
-      height="80vh"
-      sx={{
-        margin: "auto",
-        marginTop: "50px",
-      }}
-    >
+    <Box width="100%" height="90vh">
       <CanvasToolbar gol={props.gol}></CanvasToolbar>
       <GridCanvas grid={props.gol.grid} />
     </Box>
   );
 };
-
 export default Editor;
-export {};

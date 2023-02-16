@@ -40,7 +40,7 @@ export const SaveDialog = (props: Props) => {
         <ListItemButton
           onClick={() => {
             setOpen(true);
-            props.golEditor.save();
+            props.golEditor.save("WIP TITLE", "WIP DESCRIPTION");
           }}
         >
           <ListItemIcon>{<Save></Save>}</ListItemIcon>

@@ -19,6 +19,34 @@ export const DefaultGridCtx: GridCtx = {
   defaultValue: false,
   state: create2dArray(3, 3, false),
 };
+const compressState = (state: boolean[][], rows: number, columns: number) => {
+  const compressed: Vec2<number>[] = [];
+
+  for (let x = 0; x < rows; x++) {
+    for (let y = 0; y < columns; y++) {
+      const cell = state[x][y];
+      if (cell === true) {
+        compressed.push({ x, y });
+      }
+    }
+  }
+
+  return compressed;
+};
+const decompressState = (
+  compressedState: Vec2<number>[],
+  rows: number,
+  columns: number
+) => {
+  let state = create2dArray(rows, columns, false);
+  compressedState.map((cellPosition: Vec2<number>) => {
+    const x = cellPosition.x;
+    const y = cellPosition.y;
+    state[x][y] = true;
+  });
+
+  return state;
+};
 
 export const createGridCtx = (
   rows: number = 3,
@@ -127,7 +155,14 @@ export const useGrid = (default_ctx: GridCtx = DefaultGridCtx) => {
   };
 
   const toJson = () => {
-    return JSON.stringify(ctx.state);
+    const compressedState = compressState(ctx.state, ctx.rows, ctx.columns);
+    return JSON.stringify(compressedState);
+  };
+
+  const fromJson = (json: string) => {
+    const compressedState = JSON.parse(json);
+    const state = decompressState(compressedState, ctx.rows, ctx.columns);
+    setState(state);
   };
 
   return {
@@ -139,5 +174,6 @@ export const useGrid = (default_ctx: GridCtx = DefaultGridCtx) => {
     setState,
     windowSpaceToGridSpace,
     toJson,
+    fromJson,
   };
 };

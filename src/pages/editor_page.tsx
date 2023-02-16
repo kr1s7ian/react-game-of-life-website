@@ -1,7 +1,7 @@
 import GridCanvas from "../components/grid_editor/editor_grid";
 import Editor from "../components/grid_editor/editor";
 import useGol from "../hooks/useGol";
-import { createGridCtx } from "../hooks/useGrid";
+import { createGridCtx, useGrid } from "../hooks/useGrid";
 
 import * as React from "react";
 import { styled, useTheme } from "@mui/material/styles";
@@ -32,6 +32,9 @@ import {
   Save,
 } from "@mui/icons-material";
 import { Button } from "@mui/material";
+import { useGolEditor } from "../hooks/useGolEditor";
+import { SaveDialog } from "../components/saveDialog";
+import { LoadDialog } from "../components/loadDialog";
 
 const drawerWidth = 240;
 
@@ -87,8 +90,9 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 export default function EditorPage() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
-
   const gol = useGol(createGridCtx(250, 250, false));
+  const golEditor = useGolEditor(gol);
+
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -145,18 +149,8 @@ export default function EditorPage() {
               <ListItemText primary={"Home"}></ListItemText>
             </ListItemButton>
           </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemIcon>{<Save></Save>}</ListItemIcon>
-              <ListItemText primary={"Save"}></ListItemText>
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemIcon>{<Download></Download>}</ListItemIcon>
-              <ListItemText primary={"Load"}></ListItemText>
-            </ListItemButton>
-          </ListItem>
+          <SaveDialog golEditor={golEditor}></SaveDialog>
+          <LoadDialog golEditor={golEditor}></LoadDialog>
         </List>
         <Divider />
         <List>
@@ -182,7 +176,7 @@ export default function EditorPage() {
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
-        <Editor gol={gol}></Editor>
+        <Editor golEditor={golEditor}></Editor>
       </Main>
     </Box>
   );

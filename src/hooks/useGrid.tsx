@@ -126,6 +126,10 @@ export const useGrid = (default_ctx: GridCtx = DefaultGridCtx) => {
     return newPos;
   };
 
+  const toJson = () => {
+    return JSON.stringify(ctx.state);
+  };
+
   return {
     ctx,
     getCell,
@@ -134,5 +138,6 @@ export const useGrid = (default_ctx: GridCtx = DefaultGridCtx) => {
     randomize,
     setState,
     windowSpaceToGridSpace,
+    toJson,
   };
 };

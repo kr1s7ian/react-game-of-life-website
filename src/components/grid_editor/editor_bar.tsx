@@ -4,11 +4,14 @@ import {
   PlayArrow,
   Refresh,
   Shuffle,
+  ZoomIn,
 } from "@mui/icons-material";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
   AppBar,
+  Badge,
   Checkbox,
+  Chip,
   Fab,
   Grow,
   IconButton,
@@ -27,9 +30,13 @@ import Button from "@mui/material/Button";
 import { Stack } from "@mui/system";
 import { useEffect, useRef, useState } from "react";
 import { UseGolReturnType } from "../../hooks/useGol";
+import {
+  defaultCellSize,
+  UseGolEditorReturnType,
+} from "../../hooks/useGolEditor";
 
 interface Props {
-  gol: UseGolReturnType;
+  golEditor: UseGolEditorReturnType;
 }
 
 const sliderMarks = [
@@ -47,8 +54,9 @@ const sliderMarks = [
 ];
 
 export const CanvasToolbar = (props: Props) => {
-  const grid = props.gol.grid;
-  const gol = props.gol;
+  const golEditor = props.golEditor;
+  const grid = props.golEditor.gol.grid;
+  const gol = props.golEditor.gol;
 
   const [showMenu, setShowmenu] = useState<boolean>(false);
   useEffect(() => {
@@ -59,7 +67,7 @@ export const CanvasToolbar = (props: Props) => {
     }, 1000 / gol.ctx.simulationFramerate);
 
     return () => clearInterval(interval);
-  }, [gol]);
+  }, [gol.advanceGeneration]);
 
   return (
     <AppBar position="relative">
@@ -75,6 +83,13 @@ export const CanvasToolbar = (props: Props) => {
             marginLeft: "auto",
           }}
         />
+        <Tooltip title="click to reset view" placement="bottom">
+          <Chip
+            onClick={() => golEditor.resetView()}
+            label={"zoom x" + Math.floor(golEditor.cellSize)}
+            sx={{ margin: "1rem" }}
+          ></Chip>
+        </Tooltip>
         <Slider
           aria-label="Custom marks"
           defaultValue={5}

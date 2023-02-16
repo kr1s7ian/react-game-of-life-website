@@ -1,4 +1,6 @@
+import { SettingsInputAntennaTwoTone } from "@mui/icons-material";
 import { useState } from "react";
+import { ProjectCtxFromJson, projectCtxToJson } from "../project";
 import { Vec2 } from "../utils";
 import { UseGolReturnType } from "./useGol";
 
@@ -18,25 +20,34 @@ export const useGolEditor = (golParam: UseGolReturnType) => {
   });
 
   const [cellSize, setCellSize] = useState<number>(defaultCellSize);
+  const [lastGridJson, setLastGridJson] = useState<string>(gol.grid.toJson());
 
   const resetView = () => {
     setCellSize(defaultCellSize);
     setOffset({ x: 0, y: 0 });
   };
-  const [lastGridJson, setLastGridJson] = useState<string>(gol.grid.toJson());
 
-  const save = () => {
-    setLastGridJson(gol.grid.toJson());
+  const save = (title: string, description: string) => {
+    const projectCtx = {
+      title,
+      description,
+      offset,
+      cellSize,
+      compressedStateJson: gol.grid.toJson(),
+    };
+    const json = projectCtxToJson(projectCtx);
+    setLastGridJson(json);
   };
 
   const getSave = () => {
     return lastGridJson;
   };
 
-  const load = (gridJson: string) => {
-    const loadedState: boolean[][] = JSON.parse(gridJson);
-    gol.grid.setState(loadedState);
-    save();
+  const load = (json: string) => {
+    const projectCtx = ProjectCtxFromJson(json);
+    setCellSize(projectCtx.cellSize);
+    setOffset(projectCtx.offset);
+    gol.grid.fromJson(projectCtx.compressedStateJson);
   };
 
   return {

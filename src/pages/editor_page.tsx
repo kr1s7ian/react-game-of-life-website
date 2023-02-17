@@ -89,9 +89,9 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 
 export default function EditorPage() {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
-  const gol = useGol(createGridCtx(250, 250, false));
-  const golEditor = useGolEditor(gol);
+  const [open, setOpen] = React.useState<boolean>(false);
+  const golEditor = useGolEditor(useGol(createGridCtx(250, 250, false)));
+  const gol = golEditor.gol;
 
   const handleDrawerOpen = () => {
     setOpen(true);

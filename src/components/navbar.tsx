@@ -12,23 +12,26 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
-import { Home } from "@mui/icons-material";
+import { Create, Home, Search } from "@mui/icons-material";
 import { Stack } from "@mui/system";
 import { Link } from "react-router-dom";
+import { useTheme } from "@emotion/react";
+import { ButtonGroup } from "@mui/material";
 
 export const Navbar = () => {
+  const theme = useTheme();
   return (
     <AppBar position="static">
-      <Container maxWidth="xl">
-        <Toolbar>
-          <Tooltip title="Home">
-            <IconButton href="/react-game-of-life-website/">
-              <Home></Home>
-            </IconButton>
-          </Tooltip>
-          <Link to={"/editor"}>{"Editor"}</Link>
-        </Toolbar>
-      </Container>
+      <Toolbar>
+        <ButtonGroup size="large" variant="outlined">
+          <Button startIcon={<Home></Home>}>Home</Button>
+          <Button startIcon={<Create></Create>} href="#/editor">
+            Editor
+          </Button>
+          <Button startIcon={<Search></Search>}>Browse</Button>
+        </ButtonGroup>
+        <Avatar sx={{ marginLeft: "auto" }}></Avatar>
+      </Toolbar>
     </AppBar>
   );
 };

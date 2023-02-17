@@ -35,6 +35,7 @@ import { Button } from "@mui/material";
 import { useGolEditor } from "../hooks/useGolEditor";
 import { SaveDialog } from "../components/saveDialog";
 import { LoadDialog } from "../components/loadDialog";
+import { Navbar } from "../components/navbar";
 
 const drawerWidth = 240;
 
@@ -146,7 +147,7 @@ export default function EditorPage() {
           <ListItem disablePadding>
             <ListItemButton href="/react-game-of-life-website/">
               <ListItemIcon>{<Home></Home>}</ListItemIcon>
-              <ListItemText primary={"Home"}></ListItemText>
+              <ListItemText secondary={"Home"}></ListItemText>
             </ListItemButton>
           </ListItem>
           <SaveDialog golEditor={golEditor}></SaveDialog>

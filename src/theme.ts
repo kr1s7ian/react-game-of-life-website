@@ -1,8 +1,23 @@
 import { createTheme } from "@mui/material";
-import blue from "@mui/material/colors/blue";
-import pink from "@mui/material/colors/pink";
 export const appTheme = createTheme({
-    palette: {
-        mode: 'dark',
-      },
-  });
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#95B335",
+    },
+    secondary: {
+      main: "#95B335",
+    },
+    background: {
+      default: "#212433",
+      paper: "#040615",
+    },
+    text: {
+      primary: "#CCC",
+      secondary: "#CCC",
+    },
+    action: {
+      active: "#95B335",
+    },
+  },
+});

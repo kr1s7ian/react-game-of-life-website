@@ -72,7 +72,11 @@ export const CanvasToolbar = (props: Props) => {
   return (
     <AppBar position="relative">
       <Toolbar sx={{ flexWrap: "wrap" }}>
-        <Input placeholder="new project"></Input>
+        <Input
+          placeholder="new project"
+          value={golEditor.projectTitle}
+          onChange={(e) => golEditor.setProjectTitle(e.target.value)}
+        ></Input>
         <Checkbox
           icon={<PlayArrow />}
           checkedIcon={<Pause />}

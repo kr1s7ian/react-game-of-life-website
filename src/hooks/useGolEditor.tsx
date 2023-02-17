@@ -21,6 +21,7 @@ export const useGolEditor = (golParam: UseGolReturnType) => {
 
   const [cellSize, setCellSize] = useState<number>(defaultCellSize);
   const [lastGridJson, setLastGridJson] = useState<string>(gol.grid.toJson());
+  const [projectTitle, setProjectTitle] = useState<string>("");
 
   const resetView = () => {
     setCellSize(defaultCellSize);
@@ -47,6 +48,7 @@ export const useGolEditor = (golParam: UseGolReturnType) => {
     const projectCtx = ProjectCtxFromJson(json);
     setCellSize(projectCtx.cellSize);
     setOffset(projectCtx.offset);
+    setProjectTitle(projectCtx.title);
     gol.grid.fromJson(projectCtx.compressedStateJson);
   };
 
@@ -58,6 +60,8 @@ export const useGolEditor = (golParam: UseGolReturnType) => {
     setOffset,
     cellSize,
     setCellSize,
+    projectTitle,
+    setProjectTitle,
     resetView,
     save,
     getSave,

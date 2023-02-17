@@ -154,26 +154,6 @@ export default function EditorPage() {
           <LoadDialog golEditor={golEditor}></LoadDialog>
         </List>
         <Divider />
-        <List>
-          <ListItem disablePadding>
-            <ListItemButton onClick={() => gol.grid.fill(false)}>
-              <ListItemIcon>{<Delete></Delete>}</ListItemIcon>
-              <ListItemText primary={"Clear"}></ListItemText>
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton onClick={() => gol.grid.randomize()}>
-              <ListItemIcon>{<Air></Air>}</ListItemIcon>
-              <ListItemText primary={"Randomize"}></ListItemText>
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton onClick={() => gol.advanceGeneration()}>
-              <ListItemIcon>{<AirlineStops></AirlineStops>}</ListItemIcon>
-              <ListItemText primary={"Step Simulation"}></ListItemText>
-            </ListItemButton>
-          </ListItem>
-        </List>
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
